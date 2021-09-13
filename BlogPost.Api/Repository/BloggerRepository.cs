@@ -65,7 +65,7 @@ namespace BlogPost.Api.Repository
 
         public async Task<Blogger> Update(Blogger obj)
         {
-            var blogger = await bloggingContext.Bloggers.FirstOrDefaultAsync(x => x.BloggerId.Equals(obj.BloggerId));
+            var blogger = await bloggingContext.Bloggers.FirstOrDefaultAsync(x => x.BloggerId.Equals(obj.BloggerId) || x.UserId.Equals(obj.UserId));
             if (blogger != null)
             {
                 blogger.Name = obj.Name;

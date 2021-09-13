@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BlogPost.Api.Domain;
 using BlogPost.Api.Repository;
+using MyBlogPost.Common.MQ;
 
 namespace BlogPost.Api
 {
@@ -39,6 +40,11 @@ namespace BlogPost.Api
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserRegistration.Api", Version = "v1" });
             });
             services.AddTransient<IRepository<AppUser>, AppUserRepository>();
+
+            var serviceClientSettingsConfig = Configuration.GetSection("RabbitMq");
+            var serviceClientSettings = serviceClientSettingsConfig.Get<RabbitMqConfiguration>();
+            services.Configure<RabbitMqConfiguration>(serviceClientSettingsConfig);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

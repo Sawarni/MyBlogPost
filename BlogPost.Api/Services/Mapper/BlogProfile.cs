@@ -12,10 +12,10 @@ namespace BlogPost.Api.Services.Mapper
     {
         public BlogProfile()
         {
-            CreateMap<BlogDetail, Blog>()
-                .ForMember(x => x.Blogger.UserId, cfg => cfg.MapFrom(y => y.BloggerUserId))
-                .ForMember(x => x.Blogger.Name, cfg => cfg.MapFrom(y => y.BloggerName))
-                .ForMember(x => x.Blogger.Email, cfg => cfg.MapFrom(y => y.BloggerEmail));
+            //CreateMap<BlogDetail, Blog>()
+            //    .ForMember(x => x.Blogger.UserId, cfg => cfg.MapFrom(y => y.BloggerUserId))
+            //    .ForMember(x => x.Blogger.Name, cfg => cfg.MapFrom(y => y.BloggerName))
+            //    .ForMember(x => x.Blogger.Email, cfg => cfg.MapFrom(y => y.BloggerEmail));
 
             CreateMap<Blog, BlogDetail>()
                 .ForMember(x => x.BloggerUserId, cfg => cfg.MapFrom(y => y.Blogger.UserId))

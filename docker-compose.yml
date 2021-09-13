@@ -11,6 +11,20 @@ services:
       - "5004:80"
     depends_on: 
       - db
+  
+  db:
+    image: sawarni/blogpostdbsql
+    environment:
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: dbuserpassword
+      MYSQL_ROOT_PASSWORD: mypassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    #  - ./_MySQL_Init_Script:/docker-entrypoint-initdb.d
+    restart: always
+
   blogpost.api:
     image: ${DOCKER_REGISTRY-}blogpostapi
     build:
@@ -19,20 +33,8 @@ services:
     ports:
       - "5001:443"
       - "5002:80"
-    depends_on:
+    depends_on: 
       - db
-  db:
-    image: sawarni/blogpostdbsql
-    environment:
-      MYSQL_USER: dbuser
-      MYSQL_PASSWORD: dbuserpassword
-      MYSQL_ROOT_PASSWORD: sawarni
-    ports:
-      - "3306:3306"
-    #volumes:
-    #  - dbdata:/var/lib/mysql
-    #  - ./_MySQL_Init_Script:/docker-entrypoint-initdb.d
-    restart: always
-
+  
 volumes:
   dbdata:

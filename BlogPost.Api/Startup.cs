@@ -12,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using MyBlogPost.Common.InterserviceContracts;
+using MyBlogPost.Common.MQ;
 using MyBlogPost.Common.RepositoryBase;
 using System;
 using System.Collections.Generic;
@@ -48,13 +50,61 @@ namespace BlogPost.Api
             services.AddTransient<IBlogService, BlogService>();
 
             services.AddTransient<IBloggerService, BloggerService>();
+            EnableMessageReceive(services);
+
 
 
 
         }
 
+        private void EnableMessageReceive(IServiceCollection services)
+        {
+            var provider = services.BuildServiceProvider();
+            var serviceClientSettingsConfig = Configuration.GetSection("RabbitMq");
+            var serviceClientSettings = serviceClientSettingsConfig.Get<RabbitMqConfiguration>();
+
+            Subscriber subscriber = new Subscriber(serviceClientSettings.Hostname, serviceClientSettings.UserName, serviceClientSettings.Password);
+            
+            subscriber.ListenToQueue(async (e, payload) =>
+             {
+
+                UserDataExchange exchange = new UserDataExchange().GetFromString(payload);
+                Blogger blogger = new Blogger
+                {
+                    Email = exchange.EmailId,
+                    Name = exchange.Name,
+                    UserId = exchange.UserId
+                };
+
+                IRepository<Blogger> bloggerRepository = provider.GetRequiredService<IRepository<Blogger>>();
+
+                switch (e)
+                {
+
+                    case ExchaneEvents.UserAdd:
+                       await bloggerRepository.Create(blogger);
+                        break;
+
+                    case ExchaneEvents.UserUpdate:
+                       await bloggerRepository.Update(blogger);
+                        break;
+                    case ExchaneEvents.UserDelete:
+                        var bloggerDb = await bloggerRepository.Get(x => x.UserId.Equals(blogger.UserId));
+                        await bloggerRepository.Delete(bloggerDb.First().BloggerId);
+                        break;
+
+
+                    default:
+                        break;
+                }
+
+
+
+            }, "user.blog");
+        }
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
         {
             if (env.IsDevelopment())
             {
@@ -73,6 +123,8 @@ namespace BlogPost.Api
             {
                 endpoints.MapControllers();
             });
+
+            
         }
     }
 }

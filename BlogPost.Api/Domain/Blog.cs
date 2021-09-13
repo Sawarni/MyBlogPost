@@ -15,6 +15,8 @@ namespace BlogPost.Api.Domain
         public string BlogContent { get; set; }
 
         public DateTime CreatedOn { get; set; }
+
+        public int BloggerId { get; set; }
         public Blogger Blogger { get; set; }
     }
 }
